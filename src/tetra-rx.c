@@ -35,6 +35,7 @@
 #include "tetra_gsmtap.h"
 
 void *tetra_tall_ctx;
+char *dumpdir;
 
 int main(int argc, char **argv)
 {
@@ -52,6 +53,8 @@ int main(int argc, char **argv)
 		perror("open");
 		exit(2);
 	}
+
+	dumpdir=argv[2];
 
 	tetra_gsmtap_init("localhost", 0);
 
