@@ -155,6 +155,8 @@ void tp_sap_udata_ind(enum tp_sap_data_type type, const uint8_t *bits, unsigned 
 
 	struct msgb *msg;
 
+	extern char *dumpdir;
+
 	ttp = tmvsap_prim_alloc(PRIM_TMV_UNITDATA, PRIM_OP_INDICATION);
 	tup = &ttp->u.unitdata;
 	msg = ttp->oph.msg;
@@ -187,18 +189,14 @@ void tp_sap_udata_ind(enum tp_sap_data_type type, const uint8_t *bits, unsigned 
 
 /*  ###### Begin traffic dump patch ###### */
 
-	if ((type == TPSAP_T_SCH_F) && (tms->cur_burst.is_traffic)) {
-		printf("SAVING FRAME\n");
+	if ((type == TPSAP_T_SCH_F) && (tms->cur_burst.is_traffic) && dumpdir != NULL) {
 		char fname[200];
 		int16_t block[690];
 		FILE *f;
 		int i;
 
 		/* Open target file */
-		//snprintf(fname, 100, "traffic_%d_%d.out", tcd->time.tn, tms->cur_burst.is_traffic);
-		//snprintf(fname, 100, "traffic_%d.out", tcd->time.tn);
-		extern char *dumpdir;
-		snprintf(fname, 199, "%s/traffic_%d.out", dumpdir, 666	/*tms->cur_burst.is_traffic*/);
+		snprintf(fname, 199, "%s/traffic_%d.out", dumpdir, tms->cur_burst.is_traffic);
 		f = fopen(fname, "ab");
 
 		/* Generate a block */
@@ -223,14 +221,6 @@ void tp_sap_udata_ind(enum tp_sap_data_type type, const uint8_t *bits, unsigned 
 
 		/* Close */
 		fclose(f);
-		memset(fname, 0x0, sizeof(char)*200);
-		//snprintf(fname, 199, "%s/traffic_%d.txt", dumpdir, tms->cur_burst.is_traffic);
-		/* Write used ssi */
-		/*f=fopen(fname, "a");
-		memset(fname, 0x0, sizeof(char)*200);
-		snprintf(fname, 199, "%d\n", ssi);
-		fwrite(fname, sizeof(char), strlen(fname), f);
-		fclose(f);*/
 	}
 
 	/* end traffic dump patch */

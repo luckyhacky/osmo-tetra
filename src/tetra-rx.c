@@ -54,7 +54,20 @@ int main(int argc, char **argv)
 		exit(2);
 	}
 
-	dumpdir=argv[2];
+	// check if dir is writeable - if yes use it
+	if(argc > 2)
+	{
+		if(access(argv[2], W_OK) == 0)
+		{
+			printf("Info: dump activated\n");
+			dumpdir = argv[2];
+		}
+		else
+		{
+			printf("Info: directory '%s' does not exist or is not writeable ... skipping dump\n", dumpdir);
+			dumpdir = NULL;
+		}
+	}
 
 	tetra_gsmtap_init("localhost", 0);
 
