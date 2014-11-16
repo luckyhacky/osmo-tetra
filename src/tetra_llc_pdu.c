@@ -92,8 +92,12 @@ int tetra_llc_pdu_parse(struct tetra_llc_pdu *lpp, uint8_t *buf, int len)
 
 	switch (pdu_type) {
 	case TLLC_PDUT_BL_ADATA_FCS:
-		/* FIXME */
-		len -= 32;
+		lpp->nr = *cur++;
+		lpp->ns = *cur++;
+		lpp->tl_sdu = cur;
+		lpp->tl_sdu_len = len - (cur - buf) - 32; // FCS length is 32 byte see 32.2.2.2 - should it be 4bytes: TODO: Test it!
+		lpp->fcs = cur + lpp->tl_sdu_len;
+		lpp->pdu_type = TLLC_PDUT_DEC_BL_ADATA;
 	case TLLC_PDUT_BL_ADATA:
 		lpp->nr = *cur++;
 		lpp->ns = *cur++;
@@ -102,8 +106,11 @@ int tetra_llc_pdu_parse(struct tetra_llc_pdu *lpp, uint8_t *buf, int len)
 		lpp->pdu_type = TLLC_PDUT_DEC_BL_ADATA;
 		break;
 	case TLLC_PDUT_BL_DATA_FCS:
-		/* FIXME */
-		len -= 32;
+		lpp->ns = *cur++;
+		lpp->tl_sdu = cur;
+		lpp->tl_sdu_len = len - (cur - buf) - 32; // FCS length is 32 byte see 32.2.2.2 - should it be 4bytes: TODO: Test it!
+		lpp->fcs = cur + lpp->tl_sdu_len;
+		lpp->pdu_type = TLLC_PDUT_DEC_BL_DATA;
 	case TLLC_PDUT_BL_DATA:
 		lpp->ns = *cur++;
 		lpp->tl_sdu = cur;
@@ -111,8 +118,10 @@ int tetra_llc_pdu_parse(struct tetra_llc_pdu *lpp, uint8_t *buf, int len)
 		lpp->pdu_type = TLLC_PDUT_DEC_BL_DATA;
 		break;
 	case TLLC_PDUT_BL_UDATA_FCS:
-		/* FIXME */
-		len -= 32;
+		lpp->tl_sdu = cur;
+		lpp->tl_sdu_len = len - (cur - buf) - 32; // FCS length is 32 byte see 32.2.2.2 - should it be 4bytes: TODO: Test it!
+		lpp->fcs = cur + lpp->tl_sdu_len;
+		lpp->pdu_type = TLLC_PDUT_DEC_BL_UDATA;
 	case TLLC_PDUT_BL_UDATA:
 		lpp->tl_sdu = cur;
 		lpp->tl_sdu_len = len - (cur - buf);
@@ -161,5 +170,8 @@ int tetra_llc_pdu_parse(struct tetra_llc_pdu *lpp, uint8_t *buf, int len)
 		}
 		break;
 	}
+	
+	/* FIXME: compute FCS and compare it */
+	
 	return (cur - buf);
 }
